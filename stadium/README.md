@@ -3,8 +3,13 @@
 Run `npm ci`, then `npm run dev`, and open `http://localhost:4173/stadium.html`. The production build includes this page at `/stadium.html`.
 
 For the GitHub Pages preview, run `node stadium/build-pages.mjs` and publish the contents of `dist` from the `gh-pages` branch. The Pages URL is `https://antonioevans.github.io/gods-eye-view/stadium.html`.
+Opening `stadium.html` directly as a local file redirects to the hosted preview, since Vite's modules and styles need a web server.
 
 The demo centers the existing Cesium globe on Citi Field. It includes editable sample zones and sample operational issues, map focus, acknowledge and resolve actions, archive and restore, a JSON export, 20 persistent themes, and a street or satellite imagery switch. Issue and zone changes are kept in the current browser's local storage. Reset demo restores the initial sample records.
+
+Game day runs a deterministic synthetic visitor simulation. Change between a game and a show, generate 50 to 500 visitor groups, play or pause time, change speed, or scrub from 90 minutes before to 90 minutes after the event starts. Colored points move through illustrative parking, transit, walk-up, gate, concourse, and seating paths. The activity panel calculates visitor counts, parked cars, gate queue, admissions, and simulated spend from those groups. Transaction rows appear at their simulated times and can be filtered and sorted. Camera presets focus the parking approach, entry, and bowl; Closer moves the camera progressively lower. The map imagery remains a public aerial map and does not provide an indoor floor plan or individual tracking.
+
+All visitors, routes, seat points, ticket scans, parking payments, concessions, merchandise, and spending amounts are generated locally. They are examples only, not actual attendance, sales, camera detection, or venue telemetry. No payment is processed. The simulation resets on reload, while editable operations records and display settings persist in this browser.
 
 Current weather is fetched from Open-Meteo's forecast API for the venue center. The timestamp shown is the weather model's time, not a venue sensor timestamp. Open-Meteo describes its free endpoint as suitable for evaluation and prototyping; a commercial service needs the appropriate licence and endpoint. If weather fails, the panel shows an error and offers a retry.
 

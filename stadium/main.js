@@ -1,6 +1,7 @@
 import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import themes from './theme/index.json';
+import { createGameDay } from './gameDay.js';
 
 const CENTER = { lat: 40.7570308, lon: -73.8457626 };
 const STORAGE = 'noble-citi-field-demo-v1';
@@ -33,6 +34,7 @@ let editingIssue = null;
 let editingZone = null;
 let viewer;
 let zoneEntities = [];
+let gameDay;
 
 const $ = (selector) => document.querySelector(selector);
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
@@ -151,7 +153,7 @@ function initMap() {
     });
     viewer.scene.globe.enableLighting = false;
     viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#101826');
-    viewer.scene.screenSpaceCameraController.minimumZoomDistance = 100;
+    viewer.scene.screenSpaceCameraController.minimumZoomDistance = 12;
     viewer.scene.screenSpaceCameraController.maximumZoomDistance = 50000;
     viewer.camera.lookAt(Cesium.Cartesian3.fromDegrees(CENTER.lon, CENTER.lat), new Cesium.HeadingPitchRange(Cesium.Math.toRadians(18), Cesium.Math.toRadians(-66), 1300));
     viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
@@ -159,6 +161,7 @@ function initMap() {
       if (entity?.id?.startsWith('zone-')) focusZone(entity.id.slice(5));
     });
     renderMapZones();
+    gameDay.attachViewer(viewer);
     setImagery(settings.imagery === 'osm' ? 'osm' : 'esri');
   } catch (error) {
     $('#map-error').hidden = false;
@@ -303,6 +306,7 @@ function updateClock() {
   $('#map-clock').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false, weekday: 'short' }).format(new Date()).toUpperCase() + ' ET';
 }
 initControls();
+gameDay = createGameDay();
 renderZones(); renderIssues(); renderThemeOptions(); applyTheme(settings.theme);
 updateClock(); setInterval(updateClock, 30000);
 initMap(); refreshWeather(); setInterval(refreshWeather, 15 * 60 * 1000);

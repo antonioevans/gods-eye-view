@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en" data-theme="midnight">
+  <head>
+    <link rel="stylesheet" href="/gods-eye-view/cesium/Widgets/widgets.css">
+    <script src="/gods-eye-view/cesium/Cesium.js"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noble Venue Command | Citi Field Demo</title>
+    <link rel="stylesheet" href="./stadium/theme/midnight.css" id="theme-stylesheet" />
+    <script type="module" crossorigin src="/gods-eye-view/assets/stadium-CLgpZSXS.js"></script>
+    <link rel="modulepreload" crossorigin href="/gods-eye-view/assets/modulepreload-polyfill-B5Qt9EMX.js">
+    <link rel="stylesheet" crossorigin href="/gods-eye-view/assets/stadium-DnXugO9H.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand" title="Noble venue command demo"><span class="brand-mark">N</span><strong>NOBLE</strong><span class="brand-rule"></span><span>VENUE COMMAND</span></div>
+      <div class="top-actions">
+        <span class="demo-badge" title="Operational zones and incidents are illustrative demo data">DEMO DATA</span>
+        <button id="reset-view" class="quiet-button" title="Return the camera to Citi Field">Reset view</button>
+        <button id="settings-open" class="quiet-button" title="Change the map and theme">Settings</button>
+      </div>
+    </header>
+    <main class="layout">
+      <aside class="left-rail">
+        <section class="venue-card">
+          <div class="eyebrow" title="The venue selected for this demo">VENUE <span class="hint-mark" title="This demo is centered on Citi Field">?</span></div>
+          <h1 title="Citi Field venue monitoring demo">Citi Field <span class="hint-mark" title="Citi Field venue monitoring demo">?</span></h1>
+          <div class="venue-address" title="Public venue address from OpenStreetMap">41 Seaver Way<br />Queens, New York</div>
+          <div class="venue-coordinates" title="Map center from OpenStreetMap">40.757031° N &nbsp; 73.845763° W</div>
+        </section>
+        <section class="rail-section">
+          <div class="section-heading"><h2 title="Illustrative zones around the venue">Zones <span class="hint-mark" title="These are sample operating zones, not an official venue plan">?</span></h2><button id="add-zone" class="icon-button" aria-label="Add zone" title="Add a demo zone">+</button></div>
+          <div id="zone-list" class="zone-list"></div>
+        </section>
+        <section class="rail-section source-panel">
+          <h2 title="Where each on-screen signal comes from">Signal sources <span class="hint-mark" title="Check which data is live and which data is sample data">?</span></h2>
+          <div class="source-row" title="Open-Meteo current weather model data"><span class="source-dot live"></span><span>Weather model</span><strong id="weather-source-status">Loading</strong></div>
+          <div class="source-row" title="Operational records are stored in this browser"><span class="source-dot demo"></span><span>Operations</span><strong>Demo</strong></div>
+          <div class="source-row" title="OpenStreetMap data defines the venue center"><span class="source-dot map"></span><span>Venue map</span><strong>Public</strong></div>
+        </section>
+      </aside>
+      <section class="map-shell" aria-label="Citi Field 3D map">
+        <div id="globe"></div>
+        <div class="map-top-left"><span class="map-kicker">CITI FIELD / QUEENS, NY</span><span id="map-view-label">VENUE OVERVIEW</span></div>
+        <div class="map-top-right" id="map-clock" title="Local time in New York"></div>
+        <div id="map-error" class="map-error" hidden></div>
+        <div class="map-bottom-left"><span class="pulse"></span><span>3D VENUE VIEW</span><span class="map-separator">/</span><span>ILLUSTRATIVE ZONES</span></div>
+        <div class="map-credits"><span id="manual-credits"></span><span id="cesium-credits"></span></div>
+      </section>
+      <aside class="right-rail">
+        <section class="weather-card">
+          <div class="section-heading"><h2 title="Current model weather near Citi Field">Weather <span class="hint-mark" title="Current Open-Meteo model conditions near Citi Field">?</span></h2><button id="refresh-weather" class="icon-button refresh" aria-label="Refresh weather" title="Refresh current weather">↻</button></div>
+          <div class="weather-main"><strong id="weather-temp">--°</strong><span id="weather-condition">Loading weather</span></div>
+          <div class="weather-grid">
+            <div title="Wind speed at ten meters above ground"><span>WIND <span class="hint-mark" title="Wind speed at ten meters above ground">?</span></span><strong id="weather-wind">-- mph</strong></div>
+            <div title="Current precipitation"><span>RAIN <span class="hint-mark" title="Current precipitation">?</span></span><strong id="weather-rain">-- in</strong></div>
+            <div title="Current relative humidity"><span>HUMIDITY <span class="hint-mark" title="Current relative humidity">?</span></span><strong id="weather-humidity">--%</strong></div>
+          </div>
+          <div id="weather-updated" class="weather-updated">Waiting for source</div>
+        </section>
+        <section class="incidents-section">
+          <div class="section-heading"><h2 title="Sample operational issues for the demo">Operations <span class="hint-mark" title="Sample records are editable and saved in this browser">?</span></h2><button id="add-incident" class="primary-button" title="Create a demo operational issue">New issue</button></div>
+          <div class="filter-row" role="group" aria-label="Issue status filter">
+            <button class="filter active" data-filter="open" title="Show open issues">Open</button>
+            <button class="filter" data-filter="all" title="Show all issues">All</button>
+            <button class="filter" data-filter="resolved" title="Show resolved issues">Resolved</button>
+            <button class="filter" data-filter="archived" title="Show archived issues">Archived</button>
+          </div>
+          <div id="incident-list" class="incident-list"></div>
+        </section>
+      </aside>
+    </main>
+    <dialog id="issue-dialog" class="form-dialog">
+      <form id="issue-form" method="dialog">
+        <div class="dialog-heading"><h2 id="issue-dialog-title" title="Edit an operational issue">Issue <span class="hint-mark" title="Edit the issue and save it in this browser">?</span></h2><button type="button" class="icon-button" data-close="issue-dialog" aria-label="Close issue form" title="Close">×</button></div>
+        <div class="form-grid">
+          <label class="span-two" title="Short name for this issue">Title <span class="hint-mark" title="Short name for this issue">?</span><input name="title" required maxlength="90" autocomplete="off" /></label>
+          <label title="Operating zone for this issue">Zone <span class="hint-mark" title="Operating zone for this issue">?</span><select name="zone" id="issue-zone"></select></label>
+          <label title="How urgently this issue needs attention">Priority <span class="hint-mark" title="How urgently this issue needs attention">?</span><select name="priority"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
+          <label title="Current issue state">Status <span class="hint-mark" title="Current issue state">?</span><select name="status"><option>Open</option><option>Acknowledged</option><option>Resolved</option></select></label>
+          <label title="Person or team responsible">Owner <span class="hint-mark" title="Person or team responsible">?</span><input name="owner" maxlength="50" placeholder="Unassigned" /></label>
+          <label class="span-two" title="Operational details visible in the issue list">Notes <span class="hint-mark" title="Operational details visible in the issue list">?</span><textarea name="notes" rows="3" maxlength="500"></textarea></label>
+        </div>
+        <div class="dialog-actions"><button type="button" id="archive-issue" class="quiet-button danger" title="Archive this issue and keep it recoverable">Archive</button><button type="button" class="quiet-button" data-close="issue-dialog" title="Cancel changes">Cancel</button><button type="submit" class="primary-button" title="Save issue changes">Save issue</button></div>
+      </form>
+    </dialog>
+    <dialog id="zone-dialog" class="form-dialog">
+      <form id="zone-form" method="dialog">
+        <div class="dialog-heading"><h2 id="zone-dialog-title" title="Edit a demo zone">Zone <span class="hint-mark" title="Edit the name and map position of a demo zone">?</span></h2><button type="button" class="icon-button" data-close="zone-dialog" aria-label="Close zone form" title="Close">×</button></div>
+        <div class="form-grid">
+          <label class="span-two" title="Zone name shown on the map">Name <span class="hint-mark" title="Zone name shown on the map">?</span><input name="name" required maxlength="40" /></label>
+          <label title="Latitude in decimal degrees">Latitude <span class="hint-mark" title="Latitude in decimal degrees">?</span><input name="lat" type="number" min="-90" max="90" step="0.000001" required /></label>
+          <label title="Longitude in decimal degrees">Longitude <span class="hint-mark" title="Longitude in decimal degrees">?</span><input name="lon" type="number" min="-180" max="180" step="0.000001" required /></label>
+        </div>
+        <div class="dialog-actions"><button type="button" id="archive-zone" class="quiet-button danger" title="Archive this demo zone">Archive</button><button type="button" class="quiet-button" data-close="zone-dialog" title="Cancel changes">Cancel</button><button type="submit" class="primary-button" title="Save zone changes">Save zone</button></div>
+      </form>
+    </dialog>
+    <dialog id="settings-dialog" class="form-dialog">
+      <div class="dialog-heading"><h2 title="Display settings">Settings <span class="hint-mark" title="Change theme, imagery, and demo data">?</span></h2><button type="button" class="icon-button" data-close="settings-dialog" aria-label="Close settings" title="Close">×</button></div>
+      <div class="form-grid">
+        <label title="Search the available color themes">Theme <span class="hint-mark" title="Search and select one of the color themes">?</span><input id="theme-search" placeholder="Search themes" autocomplete="off" /></label>
+        <label title="Map imagery source">Map imagery <span class="hint-mark" title="Choose street map or satellite imagery">?</span><select id="imagery-select"><option value="osm">Street map</option><option value="esri">Satellite</option></select></label>
+        <div class="span-two theme-options" id="theme-options" role="group" aria-label="Themes"></div>
+        <div class="span-two archived-zones" id="archived-zones"></div>
+      </div>
+      <div class="dialog-actions"><button id="export-data" class="quiet-button" title="Download demo zones and operations as JSON">Export data</button><button id="reset-demo" class="quiet-button danger" title="Restore the original demo zones and issues">Reset demo</button></div>
+    </dialog>
+  </body>
+</html>

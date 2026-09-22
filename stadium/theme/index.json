@@ -10,7 +10,7 @@
       "hsl(255 75% 63%)",
       "hsl(215 24% 95%)"
     ],
-    "file": "/stadium/theme/midnight.css"
+    "file": "stadium/theme/midnight.css"
   },
   {
     "brand": "command",
@@ -23,7 +23,7 @@
       "hsl(230 75% 63%)",
       "hsl(190 24% 95%)"
     ],
-    "file": "/stadium/theme/command.css"
+    "file": "stadium/theme/command.css"
   },
   {
     "brand": "navy",
@@ -36,7 +36,7 @@
       "hsl(265 75% 63%)",
       "hsl(225 24% 95%)"
     ],
-    "file": "/stadium/theme/navy.css"
+    "file": "stadium/theme/navy.css"
   },
   {
     "brand": "forest",
@@ -49,7 +49,7 @@
       "hsl(190 75% 63%)",
       "hsl(150 24% 95%)"
     ],
-    "file": "/stadium/theme/forest.css"
+    "file": "stadium/theme/forest.css"
   },
   {
     "brand": "copper",
@@ -62,7 +62,7 @@
       "hsl(68 75% 63%)",
       "hsl(28 24% 95%)"
     ],
-    "file": "/stadium/theme/copper.css"
+    "file": "stadium/theme/copper.css"
   },
   {
     "brand": "violet",
@@ -75,7 +75,7 @@
       "hsl(312 75% 63%)",
       "hsl(272 24% 95%)"
     ],
-    "file": "/stadium/theme/violet.css"
+    "file": "stadium/theme/violet.css"
   },
   {
     "brand": "crimson",
@@ -88,7 +88,7 @@
       "hsl(30 75% 63%)",
       "hsl(350 24% 95%)"
     ],
-    "file": "/stadium/theme/crimson.css"
+    "file": "stadium/theme/crimson.css"
   },
   {
     "brand": "slate",
@@ -101,7 +101,7 @@
       "hsl(250 75% 63%)",
       "hsl(210 24% 95%)"
     ],
-    "file": "/stadium/theme/slate.css"
+    "file": "stadium/theme/slate.css"
   },
   {
     "brand": "ocean",
@@ -114,7 +114,7 @@
       "hsl(238 75% 63%)",
       "hsl(198 24% 95%)"
     ],
-    "file": "/stadium/theme/ocean.css"
+    "file": "stadium/theme/ocean.css"
   },
   {
     "brand": "amber",
@@ -127,7 +127,7 @@
       "hsl(82 75% 63%)",
       "hsl(42 24% 95%)"
     ],
-    "file": "/stadium/theme/amber.css"
+    "file": "stadium/theme/amber.css"
   },
   {
     "brand": "paper",
@@ -140,7 +140,7 @@
       "hsl(255 75% 34%)",
       "hsl(215 36% 9%)"
     ],
-    "file": "/stadium/theme/paper.css"
+    "file": "stadium/theme/paper.css"
   },
   {
     "brand": "porcelain",
@@ -153,7 +153,7 @@
       "hsl(230 75% 34%)",
       "hsl(190 36% 9%)"
     ],
-    "file": "/stadium/theme/porcelain.css"
+    "file": "stadium/theme/porcelain.css"
   },
   {
     "brand": "linen",
@@ -166,7 +166,7 @@
       "hsl(85 75% 34%)",
       "hsl(45 36% 9%)"
     ],
-    "file": "/stadium/theme/linen.css"
+    "file": "stadium/theme/linen.css"
   },
   {
     "brand": "sage",
@@ -179,7 +179,7 @@
       "hsl(185 75% 34%)",
       "hsl(145 36% 9%)"
     ],
-    "file": "/stadium/theme/sage.css"
+    "file": "stadium/theme/sage.css"
   },
   {
     "brand": "sand",
@@ -192,7 +192,7 @@
       "hsl(72 75% 34%)",
       "hsl(32 36% 9%)"
     ],
-    "file": "/stadium/theme/sand.css"
+    "file": "stadium/theme/sand.css"
   },
   {
     "brand": "ice",
@@ -205,7 +205,7 @@
       "hsl(245 75% 34%)",
       "hsl(205 36% 9%)"
     ],
-    "file": "/stadium/theme/ice.css"
+    "file": "stadium/theme/ice.css"
   },
   {
     "brand": "rose",
@@ -218,7 +218,7 @@
       "hsl(22 75% 34%)",
       "hsl(342 36% 9%)"
     ],
-    "file": "/stadium/theme/rose.css"
+    "file": "stadium/theme/rose.css"
   },
   {
     "brand": "lavender",
@@ -231,7 +231,7 @@
       "hsl(315 75% 34%)",
       "hsl(275 36% 9%)"
     ],
-    "file": "/stadium/theme/lavender.css"
+    "file": "stadium/theme/lavender.css"
   },
   {
     "brand": "mint",
@@ -244,7 +244,7 @@
       "hsl(198 75% 34%)",
       "hsl(158 36% 9%)"
     ],
-    "file": "/stadium/theme/mint.css"
+    "file": "stadium/theme/mint.css"
   },
   {
     "brand": "stone",
@@ -257,6 +257,6 @@
       "hsl(260 75% 34%)",
       "hsl(220 36% 9%)"
     ],
-    "file": "/stadium/theme/stone.css"
+    "file": "stadium/theme/stone.css"
   }
 ]

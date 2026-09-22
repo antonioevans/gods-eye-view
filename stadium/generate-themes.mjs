@@ -64,7 +64,7 @@ for (const [brand, name, hue, dark] of brands) {
     '--theme-radius-sm': '6px', '--theme-radius': '10px', '--theme-radius-lg': '16px', '--theme-radius-pill': '999px',
   };
   writeFileSync(`${root}${brand}.css`, `[data-theme="${brand}"]{${Object.entries(vars).map(([key, value]) => `${key}:${value}`).join(';')}}\n`);
-  manifest.push({ brand, name, isDark: dark, swatches: [bg, surface, primary, accent, text].map((x) => hsl(...x)), file: `/stadium/theme/${brand}.css` });
+  manifest.push({ brand, name, isDark: dark, swatches: [bg, surface, primary, accent, text].map((x) => hsl(...x)), file: `stadium/theme/${brand}.css` });
 }
 mkdirSync(fileURLToPath(new URL('./theme/', import.meta.url)), { recursive: true });
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);

@@ -2,6 +2,8 @@
 
 Run `npm ci`, then `npm run dev`, and open `http://localhost:4173/stadium.html`. The production build includes this page at `/stadium.html`.
 
+For the GitHub Pages preview, run `node stadium/build-pages.mjs` and publish the contents of `dist` from the `gh-pages` branch. The Pages URL is `https://antonioevans.github.io/gods-eye-view/stadium.html`.
+
 The demo centers the existing Cesium globe on Citi Field. It includes editable sample zones and sample operational issues, map focus, acknowledge and resolve actions, archive and restore, a JSON export, 20 persistent themes, and a street or satellite imagery switch. Issue and zone changes are kept in the current browser's local storage. Reset demo restores the initial sample records.
 
 Current weather is fetched from Open-Meteo's forecast API for the venue center. The timestamp shown is the weather model's time, not a venue sensor timestamp. Open-Meteo describes its free endpoint as suitable for evaluation and prototyping; a commercial service needs the appropriate licence and endpoint. If weather fails, the panel shows an error and offers a retry.

@@ -236,7 +236,7 @@ function applyTheme(brand) {
   const theme = themes.find((item) => item.brand === brand) || themes[0];
   settings.theme = theme.brand;
   document.documentElement.dataset.theme = theme.brand;
-  $('#theme-stylesheet').href = theme.file;
+  $('#theme-stylesheet').href = new URL(theme.file, window.location.href).href;
   persistSettings();
   renderThemeOptions();
 }

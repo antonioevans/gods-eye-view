@@ -7,10 +7,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Noble Venue Command | Citi Field Demo</title>
+    <script>if (location.protocol === 'file:') location.replace('https://antonioevans.github.io/gods-eye-view/stadium.html');</script>
     <link rel="stylesheet" href="./stadium/theme/midnight.css" id="theme-stylesheet" />
-    <script type="module" crossorigin src="/gods-eye-view/assets/stadium-CLgpZSXS.js"></script>
+    <script type="module" crossorigin src="/gods-eye-view/assets/stadium-DXGIZZB2.js"></script>
     <link rel="modulepreload" crossorigin href="/gods-eye-view/assets/modulepreload-polyfill-B5Qt9EMX.js">
-    <link rel="stylesheet" crossorigin href="/gods-eye-view/assets/stadium-DnXugO9H.css">
+    <link rel="stylesheet" crossorigin href="/gods-eye-view/assets/stadium-DmhC5ugb.css">
   </head>
   <body>
     <header class="topbar">
@@ -29,6 +30,15 @@
           <div class="venue-address" title="Public venue address from OpenStreetMap">41 Seaver Way<br />Queens, New York</div>
           <div class="venue-coordinates" title="Map center from OpenStreetMap">40.757031° N &nbsp; 73.845763° W</div>
         </section>
+        <section class="rail-section game-controls" aria-label="Synthetic event controls">
+          <div class="section-heading"><h2 title="Control the synthetic event simulation">Game day <span class="hint-mark" title="All people and transactions here are simulated">?</span></h2><span class="sim-tag" title="Generated data, not live venue telemetry">SYNTHETIC</span></div>
+          <div class="sim-clock" id="sim-clock" title="Time relative to the start of the event">T-35:00</div>
+          <div class="sim-scrub"><input id="sim-scrubber" type="range" min="-5400" max="5400" step="30" value="-2100" aria-label="Move the simulation clock" title="Drag to any point in the synthetic event" /><div><span>T-90</span><span>START</span><span>T+90</span></div></div>
+          <div class="sim-actions"><button id="sim-play" class="primary-button" title="Pause or resume the synthetic event">Pause</button><button id="sim-reset" class="quiet-button" title="Restart the synthetic event clock">Reset</button><label title="Simulation time multiplier">Speed <span class="hint-mark" title="Simulation time multiplier">?</span><select id="sim-speed"><option value="1">1×</option><option value="4" selected>4×</option><option value="12">12×</option></select></label></div>
+          <div class="sim-fields"><label title="Choose a game or show simulation">Event <span class="hint-mark" title="Choose a game or show simulation">?</span><select id="sim-kind"><option value="game">Game</option><option value="show">Show</option></select></label><label title="Number of generated visitor groups">Groups <span class="hint-mark" title="Number of generated visitor groups, 50 to 500">?</span><input id="sim-groups" type="number" min="50" max="500" step="10" value="280" /></label></div>
+          <div class="camera-group"><h3 title="Fly the camera to a close view">Camera <span class="hint-mark" title="Use Close repeatedly for a lower view">?</span></h3><div class="camera-buttons"><button data-camera="overview" title="See the entire stadium">Overview</button><button data-camera="parking" title="Zoom to the west parking approach">Parking</button><button data-camera="entry" title="Zoom to the south entry">Entry</button><button data-camera="bowl" title="Zoom to the stadium bowl">Bowl</button><button id="camera-closer" title="Move the camera closer to its current target">Closer</button></div></div>
+          <div class="sim-legend" title="Visitor group colors show their current stage"><span class="legend-dot moving"></span>Moving <span class="legend-dot queue"></span>Queue <span class="legend-dot seated"></span>Seated</div>
+        </section>
         <section class="rail-section">
           <div class="section-heading"><h2 title="Illustrative zones around the venue">Zones <span class="hint-mark" title="These are sample operating zones, not an official venue plan">?</span></h2><button id="add-zone" class="icon-button" aria-label="Add zone" title="Add a demo zone">+</button></div>
           <div id="zone-list" class="zone-list"></div>
@@ -37,6 +47,7 @@
           <h2 title="Where each on-screen signal comes from">Signal sources <span class="hint-mark" title="Check which data is live and which data is sample data">?</span></h2>
           <div class="source-row" title="Open-Meteo current weather model data"><span class="source-dot live"></span><span>Weather model</span><strong id="weather-source-status">Loading</strong></div>
           <div class="source-row" title="Operational records are stored in this browser"><span class="source-dot demo"></span><span>Operations</span><strong>Demo</strong></div>
+          <div class="source-row" title="Generated visitor paths and simulated transactions"><span class="source-dot demo"></span><span>Visitors + payments</span><strong>Synthetic</strong></div>
           <div class="source-row" title="OpenStreetMap data defines the venue center"><span class="source-dot map"></span><span>Venue map</span><strong>Public</strong></div>
         </section>
       </aside>
@@ -45,7 +56,7 @@
         <div class="map-top-left"><span class="map-kicker">CITI FIELD / QUEENS, NY</span><span id="map-view-label">VENUE OVERVIEW</span></div>
         <div class="map-top-right" id="map-clock" title="Local time in New York"></div>
         <div id="map-error" class="map-error" hidden></div>
-        <div class="map-bottom-left"><span class="pulse"></span><span>3D VENUE VIEW</span><span class="map-separator">/</span><span>ILLUSTRATIVE ZONES</span></div>
+        <div class="map-bottom-left"><span class="pulse"></span><span>3D VENUE VIEW</span><span class="map-separator">/</span><span>SYNTHETIC VISITORS</span></div>
         <div class="map-credits"><span id="manual-credits"></span><span id="cesium-credits"></span></div>
       </section>
       <aside class="right-rail">
@@ -59,7 +70,14 @@
           </div>
           <div id="weather-updated" class="weather-updated">Waiting for source</div>
         </section>
-        <section class="incidents-section">
+        <div class="right-tabs" role="group" aria-label="Activity panels"><button id="tab-activity" class="active" title="Show simulated visitor activity">Game day</button><button id="tab-operations" title="Show editable demo issues">Operations</button></div>
+        <section id="activity-section" class="activity-section">
+          <div class="section-heading"><h2 title="Synthetic activity at the selected event time">Activity <span class="hint-mark" title="All figures are generated for this demo">?</span></h2><span class="sim-tag" title="These counts are simulated">SIMULATION</span></div>
+          <div class="activity-metrics"><div title="Generated visitors in the event"><span>VISITORS</span><strong id="metric-people">0</strong></div><div title="Visitor groups in the parking approach or lot"><span>CARS PARKED</span><strong id="metric-cars">0</strong></div><div title="People currently in the entry queue"><span>GATE QUEUE</span><strong id="metric-queue">0</strong></div><div title="People who have passed the entry gates"><span>ADMITTED</span><strong id="metric-admitted">0</strong></div><div title="Sum of simulated paid transactions"><span>SIMULATED SPEND</span><strong id="metric-spend">$0</strong></div><div title="Transactions at or before the selected simulation time"><span>TRANSACTIONS</span><strong id="metric-transactions">0</strong></div></div>
+          <div class="activity-heading"><h3 title="Generated payment and gate events">Transactions <span class="hint-mark" title="Click a column to sort, or choose a type">?</span></h3><select id="tx-filter" aria-label="Filter transaction type" title="Filter generated transactions"><option value="all">All types</option><option value="Parking">Parking</option><option value="Gate scan">Gate scan</option><option value="Concessions">Concessions</option><option value="Merchandise">Merchandise</option></select></div>
+          <div class="tx-table" role="table" aria-label="Synthetic transactions"><div class="tx-head" role="row"><button data-sort="time" title="Sort by simulation time">Time</button><button data-sort="type" title="Sort by transaction type">Type</button><button data-sort="zone" title="Sort by zone">Zone</button><button data-sort="amount" title="Sort by amount">Amount</button></div><div id="tx-rows"></div></div>
+        </section>
+        <section class="incidents-section" id="operations-section" hidden>
           <div class="section-heading"><h2 title="Sample operational issues for the demo">Operations <span class="hint-mark" title="Sample records are editable and saved in this browser">?</span></h2><button id="add-incident" class="primary-button" title="Create a demo operational issue">New issue</button></div>
           <div class="filter-row" role="group" aria-label="Issue status filter">
             <button class="filter active" data-filter="open" title="Show open issues">Open</button>

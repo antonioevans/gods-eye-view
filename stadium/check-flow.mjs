@@ -8,6 +8,7 @@ const errors = [];
 page.on('pageerror', (error) => errors.push(error.message));
 await page.goto(process.env.DEMO_URL || 'http://127.0.0.1:4173/stadium.html', { waitUntil: 'domcontentloaded', timeout: 45000 });
 await page.waitForSelector('#flow-diverted');
+await page.click('#mode-toggle');
 const baseline = await page.evaluate(() => ({ diverted: Number(document.querySelector('#flow-diverted').textContent), walk: document.querySelector('#flow-walk').textContent, queue: document.querySelector('#flow-queue').textContent }));
 await page.select('#flow-template', 'west-close');
 const westClosed = await page.evaluate(() => ({ diverted: Number(document.querySelector('#flow-diverted').textContent), walk: document.querySelector('#flow-walk').textContent, queue: document.querySelector('#flow-queue').textContent, blocked: document.querySelector('#flow-blocked').textContent, barrier: document.querySelector('.barrier-item')?.textContent }));

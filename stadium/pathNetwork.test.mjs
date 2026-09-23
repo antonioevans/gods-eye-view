@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSyntheticEvent, groupAt } from './syntheticEvent.js';
-import { DEFAULT_RULES, NETWORK_EDGES, NETWORK_NODES, gateBarrier, nearestEdge, planEvent } from './pathNetwork.js';
+import { DEFAULT_RULES, GATES, NETWORK_EDGES, NETWORK_NODES, ORIGINS, gateBarrier, nearestEdge, nearestNode, planEvent } from './pathNetwork.js';
 
 const base = createSyntheticEvent();
 
@@ -47,4 +47,13 @@ test('a slowdown increases travel time without inventing off-network movement', 
   assert.equal(slowed.unreachable, 0);
   assert.ok(slowed.averageWalk > open.averageWalk);
   assert.ok(slowed.groups.some((group) => group.pathEdges.includes(segment) && group.walkSeconds > open.groups.find((entry) => entry.id === group.id).walkSeconds));
+});
+
+test('street route templates and dragged markers recalculate mapped paths', () => {
+  const westToSouth = planEvent(base, { ...DEFAULT_RULES, routeTemplateId: 'west-south' });
+  assert.ok(westToSouth.groups.filter((group) => group.route === 'west').every((group) => group.gateId === 'south'));
+  const moved = planEvent(base, { ...DEFAULT_RULES, originNodes: { west: ORIGINS.south }, gateNodes: { west: GATES.south.node }, groupStartNodes: { G001: ORIGINS.transit } });
+  assert.deepEqual(moved.groups.find((group) => group.id === 'G001').path[0], NETWORK_NODES[ORIGINS.transit]);
+  assert.ok(moved.groups.filter((group) => group.route === 'west' && group.id !== 'G001' && !group.unreachable).every((group) => group.path[0] === NETWORK_NODES[ORIGINS.south]));
+  assert.equal(nearestNode(NETWORK_NODES[ORIGINS.transit]).id, ORIGINS.transit);
 });

@@ -2,8 +2,10 @@ import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import themes from './theme/index.json';
 import { createGameDay } from './gameDay.js';
+import { decodeScenario } from './shareState.js';
 
 const CENTER = { lat: 40.7570308, lon: -73.8457626 };
+const overviewRange = () => innerWidth <= 600 ? 580 : 1300;
 const STORAGE = 'noble-citi-field-demo-v1';
 const SETTINGS = 'noble-citi-field-settings-v1';
 const defaults = {
@@ -27,6 +29,15 @@ function load(key, fallback) {
 }
 let data = load(STORAGE, defaults);
 if (!Array.isArray(data.zones) || !Array.isArray(data.issues)) data = clone(defaults);
+const shared = decodeScenario(location.search);
+if (Array.isArray(shared?.zones)) {
+  const ids = new Set();
+  const zones = shared.zones.slice(0, 50).filter((zone) => zone && typeof zone.id === 'string' && typeof zone.name === 'string' && Number.isFinite(zone.lat) && Number.isFinite(zone.lon) && zone.lat > 40.74 && zone.lat < 40.77 && zone.lon > -73.87 && zone.lon < -73.83).map((zone) => ({ id: zone.id.slice(0, 50), name: zone.name.slice(0, 40), lat: zone.lat, lon: zone.lon, archived: zone.archived === true })).filter((zone) => {
+    if (!zone.id || ids.has(zone.id)) return false;
+    ids.add(zone.id); return true;
+  });
+  if (zones.length) data.zones = zones;
+}
 let settings = load(SETTINGS, { theme: 'midnight', imagery: 'esri' });
 let selectedZone = null;
 let filter = 'open';
@@ -119,7 +130,7 @@ function resetView() {
   selectedZone = null;
   $('#map-view-label').textContent = 'VENUE OVERVIEW';
   renderZones(); renderIssues(); renderMapZones();
-  if (viewer) viewer.camera.flyToBoundingSphere(new Cesium.BoundingSphere(Cesium.Cartesian3.fromDegrees(CENTER.lon, CENTER.lat), 1), { offset: new Cesium.HeadingPitchRange(Cesium.Math.toRadians(18), Cesium.Math.toRadians(-66), 1300), duration: 1.3 });
+  if (viewer) viewer.camera.flyToBoundingSphere(new Cesium.BoundingSphere(Cesium.Cartesian3.fromDegrees(CENTER.lon, CENTER.lat), 1), { offset: new Cesium.HeadingPitchRange(Cesium.Math.toRadians(18), Cesium.Math.toRadians(-66), overviewRange()), duration: 1.3 });
 }
 
 async function setImagery(source) {
@@ -155,11 +166,8 @@ function initMap() {
     viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#101826');
     viewer.scene.screenSpaceCameraController.minimumZoomDistance = 12;
     viewer.scene.screenSpaceCameraController.maximumZoomDistance = 50000;
-    viewer.camera.lookAt(Cesium.Cartesian3.fromDegrees(CENTER.lon, CENTER.lat), new Cesium.HeadingPitchRange(Cesium.Math.toRadians(18), Cesium.Math.toRadians(-66), 1300));
+    viewer.camera.lookAt(Cesium.Cartesian3.fromDegrees(CENTER.lon, CENTER.lat), new Cesium.HeadingPitchRange(Cesium.Math.toRadians(18), Cesium.Math.toRadians(-66), overviewRange()));
     viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-    viewer.selectedEntityChanged.addEventListener((entity) => {
-      if (entity?.id?.startsWith('zone-')) focusZone(entity.id.slice(5));
-    });
     renderMapZones();
     gameDay.attachViewer(viewer);
     setImagery(settings.imagery === 'osm' ? 'osm' : 'esri');
@@ -306,7 +314,17 @@ function updateClock() {
   $('#map-clock').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false, weekday: 'short' }).format(new Date()).toUpperCase() + ' ET';
 }
 initControls();
-gameDay = createGameDay();
+gameDay = createGameDay({
+  getZones: () => data.zones,
+  getZone: (id) => data.zones.find((zone) => zone.id === id),
+  moveZone: (id, position) => {
+    const zone = data.zones.find((item) => item.id === id);
+    if (!zone) return;
+    [zone.lon, zone.lat] = position;
+    persist(); renderZones(); renderMapZones();
+  },
+  editZone: openZone,
+});
 renderZones(); renderIssues(); renderThemeOptions(); applyTheme(settings.theme);
 updateClock(); setInterval(updateClock, 30000);
 initMap(); refreshWeather(); setInterval(refreshWeather, 15 * 60 * 1000);

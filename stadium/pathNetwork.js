@@ -2,7 +2,14 @@ import snapshot from './data/citi-osm.json' with { type: 'json' };
 
 export const ORIGINS = Object.freeze({ west: '2297476925', south: '11237681603', transit: '3380027698', walk: '8569042987' });
 export const GATES = Object.freeze({ west: { node: '8951447963', name: 'West perimeter' }, south: { node: '8951447951', name: 'South perimeter' }, east: { node: '8951447950', name: 'East perimeter' } });
-export const DEFAULT_RULES = Object.freeze({ gatePolicy: 'nearest', capacity: 12, avoidSteps: true, closedGates: [] });
+export const DEFAULT_RULES = Object.freeze({ gatePolicy: 'nearest', capacity: 12, avoidSteps: true, closedGates: [], routeTemplateId: 'nearest', originNodes: {}, gateNodes: {}, groupStartNodes: {} });
+export const ROUTE_TEMPLATES = Object.freeze([
+  { id: 'nearest', name: 'Nearest entry', origin: null, gate: null },
+  { id: 'west-south', name: 'West lot to south entry', origin: 'west', gate: 'south' },
+  { id: 'south-east', name: 'South lot to east entry', origin: 'south', gate: 'east' },
+  { id: 'transit-west', name: 'Transit to west entry', origin: 'transit', gate: 'west' },
+  { id: 'walk-south', name: 'Walk-up to south entry', origin: 'walk', gate: 'south' },
+]);
 export const TEMPLATES = Object.freeze([
   { id: 'open', name: 'Open flow', rules: { gatePolicy: 'nearest', capacity: 12, avoidSteps: true, closedGates: [] }, barrierGate: null },
   { id: 'balanced', name: 'Balance entrances', rules: { gatePolicy: 'balanced', capacity: 12, avoidSteps: true, closedGates: [] }, barrierGate: null },
@@ -60,8 +67,17 @@ export function nearestEdge(position) {
   return nearest;
 }
 
-function shortestPath(start, end, rules, activeBarriers) {
-  const parkingOrigin = start === ORIGINS.west || start === ORIGINS.south;
+export function nearestNode(position) {
+  let nearest = null;
+  let distance = Number.POSITIVE_INFINITY;
+  for (const [id, point] of Object.entries(NETWORK_NODES)) {
+    const candidate = meters(position, point);
+    if (candidate < distance) { nearest = { id, position: point, distance: candidate }; distance = candidate; }
+  }
+  return nearest;
+}
+
+function shortestPath(start, end, rules, activeBarriers, parkingOrigin = false) {
   const blocked = new Set(activeBarriers.filter((item) => item.kind === 'closed').map((item) => item.edgeId));
   const delayed = new Set(activeBarriers.filter((item) => item.kind === 'slow').map((item) => item.edgeId));
   const distance = new Map([[start, 0]]);
@@ -109,29 +125,32 @@ function shortestPath(start, end, rules, activeBarriers) {
 export function planEvent(baseEvent, rules = DEFAULT_RULES, barriers = []) {
   const activeBarriers = barriers.filter((item) => !item.archived);
   const candidates = new Map();
-  for (const origin of Object.keys(ORIGINS)) {
-    for (const gate of Object.keys(GATES)) {
-      candidates.set(`${origin}:${gate}`, shortestPath(ORIGINS[origin], GATES[gate].node, rules, activeBarriers));
-    }
-  }
+  const routeTemplate = ROUTE_TEMPLATES.find((item) => item.id === rules.routeTemplateId);
+  const getPath = (start, gate, parking) => {
+    const destination = rules.gateNodes?.[gate] || GATES[gate].node;
+    const key = `${start}:${destination}:${parking}`;
+    if (!candidates.has(key)) candidates.set(key, shortestPath(start, destination, rules, activeBarriers, parking));
+    return candidates.get(key);
+  };
   const load = Object.fromEntries(Object.keys(GATES).map((gate) => [gate, 0]));
   const flow = new Map();
   const drafts = [...baseEvent.groups].sort((a, b) => a.arrival - b.arrival).map((group) => {
-    const choices = Object.keys(GATES).filter((gate) => !rules.closedGates?.includes(gate)).map((gate) => ({ gate, path: candidates.get(`${group.route}:${gate}`) })).filter((item) => item.path);
-    if (!choices.length) return { ...group, unreachable: true, path: [NETWORK_NODES[ORIGINS[group.route]]] };
+    const startNode = rules.groupStartNodes?.[group.id] || rules.originNodes?.[group.route] || ORIGINS[group.route];
+    const parking = group.route === 'west' || group.route === 'south';
+    const choices = Object.keys(GATES).filter((gate) => !rules.closedGates?.includes(gate)).map((gate) => ({ gate, path: getPath(startNode, gate, parking) })).filter((item) => item.path);
+    if (!choices.length) return { ...group, unreachable: true, path: [NETWORK_NODES[startNode]] };
     choices.sort((a, b) => {
-      const score = (item) => item.path.cost + (rules.gatePolicy === 'balanced' ? load[item.gate] * 4 : 0) + (['west', 'south', 'east'].includes(rules.gatePolicy) && rules.gatePolicy !== item.gate ? 260 : 0);
+      const score = (item) => item.path.cost + (rules.gatePolicy === 'balanced' ? load[item.gate] * 4 : 0) + (['west', 'south', 'east'].includes(rules.gatePolicy) && rules.gatePolicy !== item.gate ? 260 : 0) + (routeTemplate?.origin === group.route && routeTemplate.gate !== item.gate ? 100000 : 0);
       return score(a) - score(b);
     });
     const chosen = choices[0];
     const path = chosen.path;
-    const parking = group.route === 'west' || group.route === 'south';
     const pathStart = group.arrival + (parking ? 7 * 60 : 0);
     const walkSeconds = Math.max(30, (path.distance + path.delayDistance * 4) / 1.25);
     const pathArrive = pathStart + walkSeconds;
     load[chosen.gate] += group.party;
     path.edgeIds.forEach((id) => flow.set(id, (flow.get(id) || 0) + group.party));
-    return { ...group, gateId: chosen.gate, gate: NETWORK_NODES[GATES[chosen.gate].node], path: path.coords, pathLengths: path.lengths, pathEdges: path.edgeIds, pathDistance: path.distance, pathStart, pathArrive, walkSeconds };
+    return { ...group, gateId: chosen.gate, gate: NETWORK_NODES[rules.gateNodes?.[chosen.gate] || GATES[chosen.gate].node], path: path.coords, pathLengths: path.lengths, pathEdges: path.edgeIds, pathDistance: path.distance, pathStart, pathArrive, walkSeconds };
   });
   const availableAt = Object.fromEntries(Object.keys(GATES).map((gate) => [gate, baseEvent.firstTime]));
   const groups = drafts.sort((a, b) => (a.pathArrive ?? Number.POSITIVE_INFINITY) - (b.pathArrive ?? Number.POSITIVE_INFINITY)).map((group) => {
@@ -153,9 +172,9 @@ export function planEvent(baseEvent, rules = DEFAULT_RULES, barriers = []) {
   return { ...baseEvent, groups, transactions, flow, unreachable: groups.length - reachable.length, averageWalk: reachable.reduce((sum, group) => sum + group.walkSeconds * group.party, 0) / (reachable.reduce((sum, group) => sum + group.party, 0) || 1), averageWait: reachable.reduce((sum, group) => sum + group.waitSeconds * group.party, 0) / (reachable.reduce((sum, group) => sum + group.party, 0) || 1), gateLoad: load };
 }
 
-export function gateBarrier(gate) {
+export function gateBarrier(gate, gateNode = GATES[gate].node) {
   const source = Object.keys(ORIGINS).find((origin) => origin === gate) || 'walk';
-  const path = shortestPath(ORIGINS[source], GATES[gate].node, DEFAULT_RULES, []);
+  const path = shortestPath(ORIGINS[source], gateNode, DEFAULT_RULES, [], source === 'west' || source === 'south');
   const edgeId = path?.edgeIds.at(-1);
   const edge = edges.find((item) => item.id === edgeId);
   if (!edge) return null;

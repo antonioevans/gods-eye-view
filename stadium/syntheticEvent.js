@@ -4,6 +4,28 @@ const minute = 60;
 const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
 const lerp = (a, b, fraction) => a + (b - a) * clamp(fraction, 0, 1);
 const between = (a, b, fraction) => [lerp(a[0], b[0], fraction), lerp(a[1], b[1], fraction)];
+const bowlCenter = [-73.84578, 40.75703];
+const bowlRadius = [.00068, .00052];
+function bowlPolar(point) {
+  const x = (point[0] - bowlCenter[0]) / bowlRadius[0];
+  const y = (point[1] - bowlCenter[1]) / bowlRadius[1];
+  return { angle: Math.atan2(y, x), radius: Math.hypot(x, y) };
+}
+function onConcourse(point) {
+  const polar = bowlPolar(point);
+  const radius = Math.max(1.12, polar.radius);
+  return [bowlCenter[0] + Math.cos(polar.angle) * radius * bowlRadius[0], bowlCenter[1] + Math.sin(polar.angle) * radius * bowlRadius[1]];
+}
+function aroundConcourse(start, end, fraction) {
+  const from = bowlPolar(start);
+  const to = bowlPolar(end);
+  let turn = to.angle - from.angle;
+  if (turn > Math.PI) turn -= Math.PI * 2;
+  if (turn < -Math.PI) turn += Math.PI * 2;
+  const angle = from.angle + turn * clamp(fraction, 0, 1);
+  const radius = lerp(Math.max(1.12, from.radius), Math.max(1.12, to.radius), fraction);
+  return [bowlCenter[0] + Math.cos(angle) * radius * bowlRadius[0], bowlCenter[1] + Math.sin(angle) * radius * bowlRadius[1]];
+}
 const grandstand = BUILDINGS.find((building) => building.kind === 'grandstand')?.coordinates || [];
 const bounds = {
   minLon: Math.min(...grandstand.map((point) => point[0])), maxLon: Math.max(...grandstand.map((point) => point[0])),
@@ -22,7 +44,7 @@ function seatPosition(random) {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const position = [lerp(bounds.minLon, bounds.maxLon, random()), lerp(bounds.minLat, bounds.maxLat, random())];
     const inner = Math.hypot((position[0] + 73.84578) / .00068, (position[1] - 40.75703) / .00052);
-    if (insideGrandstand(position) && inner > 1) return position;
+    if (insideGrandstand(position) && inner > 1.12) return position;
   }
   return [-73.84665, 40.7568];
 }
@@ -102,6 +124,7 @@ export function createSyntheticEvent({ kind = 'game', groupCount = 280, seed = 5
 
 export function groupAt(group, time) {
   const elapsed = time - group.arrival;
+  const concourse = onConcourse(group.concourse);
   if (elapsed < 0) return { stage: 'not arrived', position: null };
   if (group.unreachable) return { stage: 'blocked', position: group.path?.[0] || null };
   if (group.path?.length) {
@@ -116,23 +139,23 @@ export function groupAt(group, time) {
     }
     if (time < group.entryTime) return { stage: 'queue', position: group.path.at(-1) };
     const admitted = time - group.entryTime;
-    if (admitted < 2 * minute) return { stage: 'admitted', position: between(group.path.at(-1), group.concourse, admitted / (2 * minute)) };
-    if (admitted < 8 * minute) return { stage: 'concourse', position: between(group.concourse, group.seat, (admitted - 2 * minute) / (6 * minute)) };
+    if (admitted < 2 * minute) return { stage: 'admitted', position: between(group.path.at(-1), concourse, admitted / (2 * minute)) };
+    if (admitted < 8 * minute) return { stage: 'concourse', position: aroundConcourse(concourse, group.seat, (admitted - 2 * minute) / (6 * minute)) };
     if (group.hasFood && time >= Math.max(group.snackTime, group.entryTime + 8 * minute) && time < Math.max(group.snackTime, group.entryTime + 8 * minute) + 5 * minute) {
       const fraction = (time - Math.max(group.snackTime, group.entryTime + 8 * minute)) / (5 * minute);
-      return { stage: 'concourse', position: fraction < .5 ? between(group.seat, group.concourse, fraction * 2) : between(group.concourse, group.seat, (fraction - .5) * 2) };
+      return { stage: 'concourse', position: fraction < .5 ? aroundConcourse(group.seat, concourse, fraction * 2) : aroundConcourse(concourse, group.seat, (fraction - .5) * 2) };
     }
     return { stage: 'seated', position: group.seat };
   }
   const parking = ROUTES[group.route].mode === 'Parking';
   if (elapsed < 6 * minute) return { stage: 'approaching', position: between(group.start, group.approach, elapsed / (6 * minute)) };
   if (elapsed < 10 * minute) return { stage: parking ? 'parking' : 'approaching', position: between(group.approach, group.gate, (elapsed - 6 * minute) / (10 * minute)) };
-  if (elapsed < 17 * minute) return { stage: 'queue', position: between(group.gate, group.concourse, .05 + (elapsed - 10 * minute) / (7 * minute) * .13) };
-  if (elapsed < 19 * minute) return { stage: 'admitted', position: between(group.gate, group.concourse, (elapsed - 17 * minute) / (2 * minute)) };
-  if (elapsed < 25 * minute) return { stage: 'concourse', position: between(group.concourse, group.seat, (elapsed - 19 * minute) / (6 * minute)) };
+  if (elapsed < 17 * minute) return { stage: 'queue', position: between(group.gate, concourse, .05 + (elapsed - 10 * minute) / (7 * minute) * .13) };
+  if (elapsed < 19 * minute) return { stage: 'admitted', position: between(group.gate, concourse, (elapsed - 17 * minute) / (2 * minute)) };
+  if (elapsed < 25 * minute) return { stage: 'concourse', position: aroundConcourse(concourse, group.seat, (elapsed - 19 * minute) / (6 * minute)) };
   if (group.hasFood && time >= group.snackTime && time < group.snackTime + 5 * minute) {
     const fraction = (time - group.snackTime) / (5 * minute);
-    return { stage: 'concourse', position: fraction < .5 ? between(group.seat, group.concourse, fraction * 2) : between(group.concourse, group.seat, (fraction - .5) * 2) };
+    return { stage: 'concourse', position: fraction < .5 ? aroundConcourse(group.seat, concourse, fraction * 2) : aroundConcourse(concourse, group.seat, (fraction - .5) * 2) };
   }
   return { stage: 'seated', position: group.seat };
 }

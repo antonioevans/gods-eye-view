@@ -27,3 +27,14 @@ test('visitors and transactions advance through the event timeline', () => {
   assert.ok(event.groups.some((group) => groupAt(group, -35 * 60).position));
   assert.equal(formatEventTime(-35 * 60), 'T-35:00');
 });
+
+test('interior visitor movement stays around the playing field', () => {
+  const event = createSyntheticEvent();
+  for (const group of event.groups) {
+    for (const minutesAfterArrival of [19, 21, 23, 25, 35]) {
+      const { position } = groupAt(group, group.arrival + minutesAfterArrival * 60);
+      const radius = Math.hypot((position[0] + 73.84578) / .00068, (position[1] - 40.75703) / .00052);
+      assert.ok(radius >= 1.1, `${group.id} entered the playing field`);
+    }
+  }
+});

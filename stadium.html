@@ -9,21 +9,35 @@
     <title>Noble Venue Command | Citi Field Demo</title>
     <script>if (location.protocol === 'file:') location.replace('https://antonioevans.github.io/gods-eye-view/stadium.html');</script>
     <link rel="stylesheet" href="./stadium/theme/midnight.css" id="theme-stylesheet" />
-    <script type="module" crossorigin src="/gods-eye-view/assets/stadium-BWgtEAsB.js"></script>
+    <script type="module" crossorigin src="/gods-eye-view/assets/stadium-Bc2t0NT5.js"></script>
     <link rel="modulepreload" crossorigin href="/gods-eye-view/assets/modulepreload-polyfill-B5Qt9EMX.js">
-    <link rel="stylesheet" crossorigin href="/gods-eye-view/assets/stadium-BZPcz83B.css">
+    <link rel="stylesheet" crossorigin href="/gods-eye-view/assets/stadium-DTfWnsxG.css">
   </head>
   <body>
     <header class="topbar">
       <div class="brand" title="Noble venue command demo"><span class="brand-mark">N</span><strong>NOBLE</strong><span class="brand-rule"></span><span>VENUE COMMAND</span></div>
       <div class="top-actions">
         <span class="demo-badge" title="Operational zones and incidents are illustrative demo data">DEMO DATA</span>
+        <button id="mode-toggle" class="quiet-button" title="Switch between simple and advanced controls">Advanced mode</button>
+        <button id="share-demo" class="quiet-button" title="Share this scenario with its route and barrier settings">Share</button>
         <button id="reset-view" class="quiet-button" title="Return the camera to Citi Field">Reset view</button>
         <button id="settings-open" class="quiet-button" title="Change the map and theme">Settings</button>
       </div>
     </header>
     <main class="layout">
       <aside class="left-rail">
+        <section class="rail-section simple-controls" aria-label="Simple simulation controls">
+          <div class="section-heading"><h2 title="Play with simulated routes around Citi Field">Playground <span class="hint-mark" title="Choose a scenario or street route, then move markers on the map">?</span></h2><span class="sim-tag" title="All visitors and payments are synthetic">SIMULATION</span></div>
+          <div class="simple-body">
+            <div class="simple-actions"><button id="simple-play" class="primary-button" title="Pause or resume visitors">Pause</button><button id="simple-3d" class="quiet-button" title="Move to a close 3D view of the venue">3D view</button></div>
+            <label title="Move through the synthetic event">Time <span class="hint-mark" title="Drag to watch visitors arrive and enter">?</span><input id="simple-scrubber" type="range" min="-5400" max="5400" step="30" value="-2100" /></label>
+            <label title="Apply a ready-made change to entry flow">Scenario <span class="hint-mark" title="Try open flow, balanced entries, closures, or slow screening">?</span><select id="simple-scenario"><option value="open">Open flow</option><option value="balanced">Balance entrances</option><option value="west-close">Close west entry</option><option value="south-close">Close south entry</option><option value="slow">Slow screening</option><option value="custom">Custom</option></select></label>
+            <label title="Choose a visitor route that follows mapped streets and walkways">Street route <span class="hint-mark" title="Move one approach toward a different entry while staying on mapped paths">?</span><select id="simple-route"><option value="nearest">Nearest entry</option><option value="west-south">West lot to south entry</option><option value="south-east">South lot to east entry</option><option value="transit-west">Transit to west entry</option><option value="walk-south">Walk-up to south entry</option></select></label>
+            <button id="simple-barrier" class="quiet-button" title="Click a mapped path to place a closure">Add barrier</button>
+            <div class="simple-stats"><div title="Visitors sent to a different entry"><span>DIVERTED</span><strong id="simple-diverted">0</strong></div><div title="Average time walking mapped paths"><span>WALK</span><strong id="simple-walk">0m</strong></div><div title="Average entry wait"><span>QUEUE</span><strong id="simple-queue">0m</strong></div><div title="Visitors without an available path"><span>BLOCKED</span><strong id="simple-blocked">0</strong></div></div>
+            <div id="simple-status" class="simple-status" role="status" hidden></div>
+          </div>
+        </section>
         <section class="venue-card">
           <div class="eyebrow" title="The venue selected for this demo">VENUE <span class="hint-mark" title="This demo is centered on Citi Field">?</span></div>
           <h1 title="Citi Field venue monitoring demo">Citi Field <span class="hint-mark" title="Citi Field venue monitoring demo">?</span></h1>
@@ -44,7 +58,7 @@
           <div class="flow-stats"><div title="Visitors assigned to a different entry than the open-flow baseline"><span>DIVERTED</span><strong id="flow-diverted">0</strong></div><div title="Average mapped walk time for generated visitors"><span>AVG WALK</span><strong id="flow-walk">0m</strong></div><div title="Average modeled gate queue time"><span>AVG QUEUE</span><strong id="flow-queue">0m</strong></div><div title="Visitors without a mapped route after a barrier"><span>BLOCKED</span><strong id="flow-blocked">0</strong></div></div>
           <div class="flow-gate-bars" id="flow-gates" title="Synthetic visitors assigned to each perimeter entry"></div>
           <div class="flow-legend" title="Path color shows total assigned visitor flow"><span><i class="light"></i>Light</span><span><i class="busy"></i>Busy</span><span><i class="dense"></i>Dense</span></div>
-          <div class="flow-fields"><label title="Apply a what-if routing template">Template <span class="hint-mark" title="Choose a routing and barrier scenario">?</span><select id="flow-template"><option value="open">Open flow</option><option value="balanced">Balance entrances</option><option value="west-close">Close west entry</option><option value="south-close">Close south entry</option><option value="slow">Slow screening</option><option value="custom">Custom</option></select></label><label title="Choose how visitor groups are assigned to entry points">Gate rule <span class="hint-mark" title="Nearest, balanced, or a preferred entry">?</span><select id="flow-gate-rule"><option value="nearest">Nearest</option><option value="balanced">Balanced</option><option value="west">Prefer west</option><option value="south">Prefer south</option><option value="east">Prefer east</option></select></label><label title="Visitors admitted per minute at each open entry">Gate capacity <span class="hint-mark" title="Synthetic admission capacity per entry, visitors per minute">?</span><input id="flow-capacity" type="number" min="2" max="60" value="12" /></label><label class="flow-check" title="Exclude mapped stairs when finding paths"><input id="flow-avoid-steps" type="checkbox" checked /> Avoid stairs</label><label class="flow-check" title="Show mapped pedestrian paths and flow colors"><input id="flow-show-paths" type="checkbox" checked /> Show paths</label><label class="flow-check" title="Display 3D buildings at close camera ranges"><input id="flow-auto-3d" type="checkbox" checked /> Auto 3D</label></div>
+          <div class="flow-fields"><label title="Apply a what-if routing template">Template <span class="hint-mark" title="Choose a routing and barrier scenario">?</span><select id="flow-template"><option value="open">Open flow</option><option value="balanced">Balance entrances</option><option value="west-close">Close west entry</option><option value="south-close">Close south entry</option><option value="slow">Slow screening</option><option value="custom">Custom</option></select></label><label title="Choose a mapped street route for one visitor approach">Street route <span class="hint-mark" title="Move an approach to another entry along mapped streets and walkways">?</span><select id="flow-route-template"><option value="nearest">Nearest entry</option><option value="west-south">West lot to south entry</option><option value="south-east">South lot to east entry</option><option value="transit-west">Transit to west entry</option><option value="walk-south">Walk-up to south entry</option></select></label><label title="Choose how visitor groups are assigned to entry points">Gate rule <span class="hint-mark" title="Nearest, balanced, or a preferred entry">?</span><select id="flow-gate-rule"><option value="nearest">Nearest</option><option value="balanced">Balanced</option><option value="west">Prefer west</option><option value="south">Prefer south</option><option value="east">Prefer east</option></select></label><label title="Visitors admitted per minute at each open entry">Gate capacity <span class="hint-mark" title="Synthetic admission capacity per entry, visitors per minute">?</span><input id="flow-capacity" type="number" min="2" max="60" value="12" /></label><label class="flow-check" title="Exclude mapped stairs when finding paths"><input id="flow-avoid-steps" type="checkbox" checked /> Avoid stairs</label><label class="flow-check" title="Show mapped pedestrian paths and flow colors"><input id="flow-show-paths" type="checkbox" checked /> Show paths</label><label class="flow-check" title="Display 3D buildings at close camera ranges"><input id="flow-auto-3d" type="checkbox" checked /> Auto 3D</label></div>
           <div class="barrier-tool"><h3 title="Place a colored closure or slowdown on a mapped path">Barriers <span class="hint-mark" title="Choose a color and type, then click Place and a visible path on the map">?</span></h3><div><label title="Color of the new barrier">Color <span class="hint-mark" title="Color used on the map and in the barrier list">?</span><input id="barrier-color" type="color" value="#ef5b5b" /></label><label title="How the new barrier affects routing">Effect <span class="hint-mark" title="Closed blocks a path segment; Slow adds a delay">?</span><select id="barrier-kind"><option value="closed">Closed</option><option value="slow">Slow</option></select></label></div><button id="barrier-place" class="primary-button" title="Click this, then click a mapped path to place a barrier">Place on map</button><div id="barrier-status" class="barrier-status" role="status" hidden></div><div id="barrier-list"></div></div>
           <div id="building-status" class="building-status" title="Mapped building heights and an illustrative grandstand volume">3D ready at close range</div>
         </section>
@@ -62,10 +76,12 @@
       </aside>
       <section class="map-shell" aria-label="Citi Field 3D map">
         <div id="globe"></div>
+        <div id="map-tooltip" class="map-tooltip" role="tooltip" hidden></div>
+        <div id="map-inspector" class="map-inspector" hidden><div class="map-inspector-head"><strong id="map-item-name"></strong><button id="map-inspector-close" class="icon-button" title="Clear the map selection" aria-label="Clear map selection">×</button></div><div id="map-item-detail"></div><div id="map-item-actions"></div></div>
         <div class="map-top-left"><span class="map-kicker">CITI FIELD / QUEENS, NY</span><span id="map-view-label">VENUE OVERVIEW</span></div>
         <div class="map-top-right" id="map-clock" title="Local time in New York"></div>
         <div id="map-error" class="map-error" hidden></div>
-        <div class="map-bottom-left"><span class="pulse"></span><span>3D VENUE VIEW</span><span class="map-separator">/</span><span>SYNTHETIC VISITORS</span></div>
+        <div class="map-bottom-left"><span class="pulse"></span><span class="advanced-map-label">3D VENUE VIEW / SYNTHETIC VISITORS</span><span class="simple-map-label">HOVER TO IDENTIFY / DRAG TO MOVE</span></div>
         <div class="map-credits"><span id="manual-credits"></span><span id="cesium-credits"></span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" title="Mapped pedestrian paths and building footprints">Paths: © OpenStreetMap contributors</a></div>
       </section>
       <aside class="right-rail">
@@ -98,6 +114,7 @@
         </section>
       </aside>
     </main>
+    <dialog id="share-dialog" class="form-dialog share-dialog"><div class="dialog-heading"><h2 title="Share this synthetic scenario">Share scenario <span class="hint-mark" title="This link includes route and barrier settings">?</span></h2><button type="button" class="icon-button" data-close="share-dialog" aria-label="Close share dialog" title="Close">×</button></div><label title="Public link to the current scenario">Link <span class="hint-mark" title="Anyone with this link can open the same synthetic scenario">?</span><input id="share-url" readonly /></label><div class="dialog-actions"><button id="copy-share" class="primary-button" title="Copy the public scenario link">Copy link</button></div><div id="share-feedback" role="status" hidden></div></dialog>
     <dialog id="issue-dialog" class="form-dialog">
       <form id="issue-form" method="dialog">
         <div class="dialog-heading"><h2 id="issue-dialog-title" title="Edit an operational issue">Issue <span class="hint-mark" title="Edit the issue and save it in this browser">?</span></h2><button type="button" class="icon-button" data-close="issue-dialog" aria-label="Close issue form" title="Close">×</button></div>

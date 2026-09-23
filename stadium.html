@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" data-theme="midnight">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noble Venue Command | Citi Field Demo</title>
+    <script>if (location.protocol === 'file:') location.replace('https://antonioevans.github.io/gods-eye-view/stadium.html');</script>
+    <link rel="stylesheet" href="./stadium/theme/midnight.css" id="theme-stylesheet" />
+    <link rel="stylesheet" href="/stadium/stadium.css" />
+    <link rel="stylesheet" href="/stadium/gameDay.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand" title="Noble venue command demo"><span class="brand-mark">N</span><strong>NOBLE</strong><span class="brand-rule"></span><span>VENUE COMMAND</span></div>
+      <div class="top-actions">
+        <span class="demo-badge" title="Operational zones and incidents are illustrative demo data">DEMO DATA</span>
+        <button id="mode-toggle" class="quiet-button" title="Switch between simple and advanced controls">Advanced mode</button>
+        <button id="share-demo" class="quiet-button" title="Share this scenario with its route and barrier settings">Share</button>
+        <button id="reset-view" class="quiet-button" title="Return the camera to Citi Field">Reset view</button>
+        <button id="settings-open" class="quiet-button" title="Change the map and theme">Settings</button>
+      </div>
+    </header>
+    <main class="layout">
+      <aside class="left-rail">
+        <section class="rail-section simple-controls" aria-label="Simple simulation controls">
+          <div class="section-heading"><h2 title="Play with simulated routes around Citi Field">Playground <span class="hint-mark" title="Choose a scenario or street route, then move markers on the map">?</span></h2><span class="sim-tag" title="All visitors and payments are synthetic">SIMULATION</span></div>
+          <div class="simple-body">
+            <div class="simple-actions"><button id="simple-play" class="primary-button" title="Pause or resume visitors">Pause</button><button id="simple-3d" class="quiet-button" title="Move to a close 3D view of the venue">3D view</button></div>
+            <label title="Move through the synthetic event">Time <span class="hint-mark" title="Drag to watch visitors arrive and enter">?</span><input id="simple-scrubber" type="range" min="-5400" max="5400" step="30" value="-2100" /></label>
+            <label title="Apply a ready-made change to entry flow">Scenario <span class="hint-mark" title="Try open flow, balanced entries, closures, or slow screening">?</span><select id="simple-scenario"><option value="open">Open flow</option><option value="balanced">Balance entrances</option><option value="west-close">Close west entry</option><option value="south-close">Close south entry</option><option value="slow">Slow screening</option><option value="custom">Custom</option></select></label>
+            <label title="Choose a visitor route that follows mapped streets and walkways">Street route <span class="hint-mark" title="Move one approach toward a different entry while staying on mapped paths">?</span><select id="simple-route"><option value="nearest">Nearest entry</option><option value="west-south">West lot to south entry</option><option value="south-east">South lot to east entry</option><option value="transit-west">Transit to west entry</option><option value="walk-south">Walk-up to south entry</option></select></label>
+            <button id="simple-barrier" class="quiet-button" title="Click a mapped path to place a closure">Add barrier</button>
+            <div class="simple-stats"><div title="Visitors sent to a different entry"><span>DIVERTED</span><strong id="simple-diverted">0</strong></div><div title="Average time walking mapped paths"><span>WALK</span><strong id="simple-walk">0m</strong></div><div title="Average entry wait"><span>QUEUE</span><strong id="simple-queue">0m</strong></div><div title="Visitors without an available path"><span>BLOCKED</span><strong id="simple-blocked">0</strong></div></div>
+            <div id="simple-status" class="simple-status" role="status" hidden></div>
+          </div>
+        </section>
+        <section class="venue-card">
+          <div class="eyebrow" title="The venue selected for this demo">VENUE <span class="hint-mark" title="This demo is centered on Citi Field">?</span></div>
+          <h1 title="Citi Field venue monitoring demo">Citi Field <span class="hint-mark" title="Citi Field venue monitoring demo">?</span></h1>
+          <div class="venue-address" title="Public venue address from OpenStreetMap">41 Seaver Way<br />Queens, New York</div>
+          <div class="venue-coordinates" title="Map center from OpenStreetMap">40.757031° N &nbsp; 73.845763° W</div>
+        </section>
+        <section class="rail-section game-controls" aria-label="Synthetic event controls">
+          <div class="section-heading"><h2 title="Control the synthetic event simulation">Game day <span class="hint-mark" title="All people and transactions here are simulated">?</span></h2><span class="sim-tag" title="Generated data, not live venue telemetry">SYNTHETIC</span></div>
+          <div class="sim-clock" id="sim-clock" title="Time relative to the start of the event">T-35:00</div>
+          <div class="sim-scrub"><input id="sim-scrubber" type="range" min="-5400" max="5400" step="30" value="-2100" aria-label="Move the simulation clock" title="Drag to any point in the synthetic event" /><div><span>T-90</span><span>START</span><span>T+90</span></div></div>
+          <div class="sim-actions"><button id="sim-play" class="primary-button" title="Pause or resume the synthetic event">Pause</button><button id="sim-reset" class="quiet-button" title="Restart the synthetic event clock">Reset</button><label title="Simulation time multiplier">Speed <span class="hint-mark" title="Simulation time multiplier">?</span><select id="sim-speed"><option value="1">1×</option><option value="4" selected>4×</option><option value="12">12×</option></select></label></div>
+          <div class="sim-fields"><label title="Choose a game or show simulation">Event <span class="hint-mark" title="Choose a game or show simulation">?</span><select id="sim-kind"><option value="game">Game</option><option value="show">Show</option></select></label><label title="Number of generated visitor groups">Groups <span class="hint-mark" title="Number of generated visitor groups, 50 to 500">?</span><input id="sim-groups" type="number" min="50" max="500" step="10" value="280" /></label></div>
+          <div class="camera-group"><h3 title="Fly the camera to a close view">Camera <span class="hint-mark" title="Use Close repeatedly for a lower view">?</span></h3><div class="camera-buttons"><button data-camera="overview" title="See the entire stadium">Overview</button><button data-camera="parking" title="Zoom to the west parking approach">Parking</button><button data-camera="entry" title="Zoom to the south entry">Entry</button><button data-camera="bowl" title="Zoom to the stadium bowl">Bowl</button><button data-camera="venue3d" title="Tilt toward the illustrative three-dimensional venue">3D venue</button><button id="camera-closer" title="Move the camera closer to its current target">Closer</button></div></div>
+          <div class="sim-legend" title="Visitor group colors show their current stage"><span class="legend-dot moving"></span>Moving <span class="legend-dot queue"></span>Queue <span class="legend-dot seated"></span>Seated</div>
+        </section>
+        <section class="rail-section network-controls" aria-label="Pedestrian flow rules">
+          <div class="section-heading"><h2 title="Mapped pedestrian paths and routing rules">Flow network <span class="hint-mark" title="OpenStreetMap walkways connect the synthetic groups to perimeter entry points">?</span></h2><span class="sim-tag" title="Pedestrian ways from OpenStreetMap">OSM PATHS</span></div>
+          <div class="flow-stats"><div title="Visitors assigned to a different entry than the open-flow baseline"><span>DIVERTED</span><strong id="flow-diverted">0</strong></div><div title="Average mapped walk time for generated visitors"><span>AVG WALK</span><strong id="flow-walk">0m</strong></div><div title="Average modeled gate queue time"><span>AVG QUEUE</span><strong id="flow-queue">0m</strong></div><div title="Visitors without a mapped route after a barrier"><span>BLOCKED</span><strong id="flow-blocked">0</strong></div></div>
+          <div class="flow-gate-bars" id="flow-gates" title="Synthetic visitors assigned to each perimeter entry"></div>
+          <div class="flow-legend" title="Path color shows total assigned visitor flow"><span><i class="light"></i>Light</span><span><i class="busy"></i>Busy</span><span><i class="dense"></i>Dense</span></div>
+          <div class="flow-fields"><label title="Apply a what-if routing template">Template <span class="hint-mark" title="Choose a routing and barrier scenario">?</span><select id="flow-template"><option value="open">Open flow</option><option value="balanced">Balance entrances</option><option value="west-close">Close west entry</option><option value="south-close">Close south entry</option><option value="slow">Slow screening</option><option value="custom">Custom</option></select></label><label title="Choose a mapped street route for one visitor approach">Street route <span class="hint-mark" title="Move an approach to another entry along mapped streets and walkways">?</span><select id="flow-route-template"><option value="nearest">Nearest entry</option><option value="west-south">West lot to south entry</option><option value="south-east">South lot to east entry</option><option value="transit-west">Transit to west entry</option><option value="walk-south">Walk-up to south entry</option></select></label><label title="Choose how visitor groups are assigned to entry points">Gate rule <span class="hint-mark" title="Nearest, balanced, or a preferred entry">?</span><select id="flow-gate-rule"><option value="nearest">Nearest</option><option value="balanced">Balanced</option><option value="west">Prefer west</option><option value="south">Prefer south</option><option value="east">Prefer east</option></select></label><label title="Visitors admitted per minute at each open entry">Gate capacity <span class="hint-mark" title="Synthetic admission capacity per entry, visitors per minute">?</span><input id="flow-capacity" type="number" min="2" max="60" value="12" /></label><label class="flow-check" title="Exclude mapped stairs when finding paths"><input id="flow-avoid-steps" type="checkbox" checked /> Avoid stairs</label><label class="flow-check" title="Show mapped pedestrian paths and flow colors"><input id="flow-show-paths" type="checkbox" checked /> Show paths</label><label class="flow-check" title="Display 3D buildings at close camera ranges"><input id="flow-auto-3d" type="checkbox" checked /> Auto 3D</label></div>
+          <div class="barrier-tool"><h3 title="Place a colored closure or slowdown on a mapped path">Barriers <span class="hint-mark" title="Choose a color and type, then click Place and a visible path on the map">?</span></h3><div><label title="Color of the new barrier">Color <span class="hint-mark" title="Color used on the map and in the barrier list">?</span><input id="barrier-color" type="color" value="#ef5b5b" /></label><label title="How the new barrier affects routing">Effect <span class="hint-mark" title="Closed blocks a path segment; Slow adds a delay">?</span><select id="barrier-kind"><option value="closed">Closed</option><option value="slow">Slow</option></select></label></div><button id="barrier-place" class="primary-button" title="Click this, then click a mapped path to place a barrier">Place on map</button><div id="barrier-status" class="barrier-status" role="status" hidden></div><div id="barrier-list"></div></div>
+          <div id="building-status" class="building-status" title="Mapped building heights and an illustrative grandstand volume">3D ready at close range</div>
+        </section>
+        <section class="rail-section">
+          <div class="section-heading"><h2 title="Illustrative zones around the venue">Zones <span class="hint-mark" title="These are sample operating zones, not an official venue plan">?</span></h2><button id="add-zone" class="icon-button" aria-label="Add zone" title="Add a demo zone">+</button></div>
+          <div id="zone-list" class="zone-list"></div>
+        </section>
+        <section class="rail-section source-panel">
+          <h2 title="Where each on-screen signal comes from">Signal sources <span class="hint-mark" title="Check which data is live and which data is sample data">?</span></h2>
+          <div class="source-row" title="Open-Meteo current weather model data"><span class="source-dot live"></span><span>Weather model</span><strong id="weather-source-status">Loading</strong></div>
+          <div class="source-row" title="Operational records are stored in this browser"><span class="source-dot demo"></span><span>Operations</span><strong>Demo</strong></div>
+          <div class="source-row" title="Generated visitor paths and simulated transactions"><span class="source-dot demo"></span><span>Visitors + payments</span><strong>Synthetic</strong></div>
+          <div class="source-row" title="OpenStreetMap data defines the venue center"><span class="source-dot map"></span><span>Venue map</span><strong>Public</strong></div>
+        </section>
+      </aside>
+      <section class="map-shell" aria-label="Citi Field 3D map">
+        <div id="globe"></div>
+        <div id="map-tooltip" class="map-tooltip" role="tooltip" hidden></div>
+        <div id="map-inspector" class="map-inspector" hidden><div class="map-inspector-head"><strong id="map-item-name"></strong><button id="map-inspector-close" class="icon-button" title="Clear the map selection" aria-label="Clear map selection">×</button></div><div id="map-item-detail"></div><div id="map-item-actions"></div></div>
+        <div class="map-top-left"><span class="map-kicker">CITI FIELD / QUEENS, NY</span><span id="map-view-label">VENUE OVERVIEW</span></div>
+        <div class="map-top-right" id="map-clock" title="Local time in New York"></div>
+        <div id="map-error" class="map-error" hidden></div>
+        <div class="map-bottom-left"><span class="pulse"></span><span class="advanced-map-label">3D VENUE VIEW / SYNTHETIC VISITORS</span><span class="simple-map-label">HOVER TO IDENTIFY / DRAG TO MOVE</span></div>
+        <div class="map-credits"><span id="manual-credits"></span><span id="cesium-credits"></span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" title="Mapped pedestrian paths and building footprints">Paths: © OpenStreetMap contributors</a></div>
+      </section>
+      <aside class="right-rail">
+        <section class="weather-card">
+          <div class="section-heading"><h2 title="Current model weather near Citi Field">Weather <span class="hint-mark" title="Current Open-Meteo model conditions near Citi Field">?</span></h2><button id="refresh-weather" class="icon-button refresh" aria-label="Refresh weather" title="Refresh current weather">↻</button></div>
+          <div class="weather-main"><strong id="weather-temp">--°</strong><span id="weather-condition">Loading weather</span></div>
+          <div class="weather-grid">
+            <div title="Wind speed at ten meters above ground"><span>WIND <span class="hint-mark" title="Wind speed at ten meters above ground">?</span></span><strong id="weather-wind">-- mph</strong></div>
+            <div title="Current precipitation"><span>RAIN <span class="hint-mark" title="Current precipitation">?</span></span><strong id="weather-rain">-- in</strong></div>
+            <div title="Current relative humidity"><span>HUMIDITY <span class="hint-mark" title="Current relative humidity">?</span></span><strong id="weather-humidity">--%</strong></div>
+          </div>
+          <div id="weather-updated" class="weather-updated">Waiting for source</div>
+        </section>
+        <div class="right-tabs" role="group" aria-label="Activity panels"><button id="tab-activity" class="active" title="Show simulated visitor activity">Game day</button><button id="tab-operations" title="Show editable demo issues">Operations</button></div>
+        <section id="activity-section" class="activity-section">
+          <div class="section-heading"><h2 title="Synthetic activity at the selected event time">Activity <span class="hint-mark" title="All figures are generated for this demo">?</span></h2><span class="sim-tag" title="These counts are simulated">SIMULATION</span></div>
+          <div class="activity-metrics"><div title="Generated visitors in the event"><span>VISITORS</span><strong id="metric-people">0</strong></div><div title="Visitor groups in the parking approach or lot"><span>CARS PARKED</span><strong id="metric-cars">0</strong></div><div title="People currently in the entry queue"><span>GATE QUEUE</span><strong id="metric-queue">0</strong></div><div title="People who have passed the entry gates"><span>ADMITTED</span><strong id="metric-admitted">0</strong></div><div title="Sum of simulated paid transactions"><span>SIMULATED SPEND</span><strong id="metric-spend">$0</strong></div><div title="Transactions at or before the selected simulation time"><span>TRANSACTIONS</span><strong id="metric-transactions">0</strong></div></div>
+          <div class="activity-heading"><h3 title="Generated payment and gate events">Transactions <span class="hint-mark" title="Click a column to sort, or choose a type">?</span></h3><select id="tx-filter" aria-label="Filter transaction type" title="Filter generated transactions"><option value="all">All types</option><option value="Parking">Parking</option><option value="Gate scan">Gate scan</option><option value="Concessions">Concessions</option><option value="Merchandise">Merchandise</option></select></div>
+          <div class="tx-table" role="table" aria-label="Synthetic transactions"><div class="tx-head" role="row"><button data-sort="time" title="Sort by simulation time">Time</button><button data-sort="type" title="Sort by transaction type">Type</button><button data-sort="zone" title="Sort by zone">Zone</button><button data-sort="amount" title="Sort by amount">Amount</button></div><div id="tx-rows"></div></div>
+        </section>
+        <section class="incidents-section" id="operations-section" hidden>
+          <div class="section-heading"><h2 title="Sample operational issues for the demo">Operations <span class="hint-mark" title="Sample records are editable and saved in this browser">?</span></h2><button id="add-incident" class="primary-button" title="Create a demo operational issue">New issue</button></div>
+          <div class="filter-row" role="group" aria-label="Issue status filter">
+            <button class="filter active" data-filter="open" title="Show open issues">Open</button>
+            <button class="filter" data-filter="all" title="Show all issues">All</button>
+            <button class="filter" data-filter="resolved" title="Show resolved issues">Resolved</button>
+            <button class="filter" data-filter="archived" title="Show archived issues">Archived</button>
+          </div>
+          <div id="incident-list" class="incident-list"></div>
+        </section>
+      </aside>
+    </main>
+    <dialog id="share-dialog" class="form-dialog share-dialog"><div class="dialog-heading"><h2 title="Share this synthetic scenario">Share scenario <span class="hint-mark" title="This link includes route and barrier settings">?</span></h2><button type="button" class="icon-button" data-close="share-dialog" aria-label="Close share dialog" title="Close">×</button></div><label title="Public link to the current scenario">Link <span class="hint-mark" title="Anyone with this link can open the same synthetic scenario">?</span><input id="share-url" readonly /></label><div class="dialog-actions"><button id="copy-share" class="primary-button" title="Copy the public scenario link">Copy link</button></div><div id="share-feedback" role="status" hidden></div></dialog>
+    <dialog id="issue-dialog" class="form-dialog">
+      <form id="issue-form" method="dialog">
+        <div class="dialog-heading"><h2 id="issue-dialog-title" title="Edit an operational issue">Issue <span class="hint-mark" title="Edit the issue and save it in this browser">?</span></h2><button type="button" class="icon-button" data-close="issue-dialog" aria-label="Close issue form" title="Close">×</button></div>
+        <div class="form-grid">
+          <label class="span-two" title="Short name for this issue">Title <span class="hint-mark" title="Short name for this issue">?</span><input name="title" required maxlength="90" autocomplete="off" /></label>
+          <label title="Operating zone for this issue">Zone <span class="hint-mark" title="Operating zone for this issue">?</span><select name="zone" id="issue-zone"></select></label>
+          <label title="How urgently this issue needs attention">Priority <span class="hint-mark" title="How urgently this issue needs attention">?</span><select name="priority"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
+          <label title="Current issue state">Status <span class="hint-mark" title="Current issue state">?</span><select name="status"><option>Open</option><option>Acknowledged</option><option>Resolved</option></select></label>
+          <label title="Person or team responsible">Owner <span class="hint-mark" title="Person or team responsible">?</span><input name="owner" maxlength="50" placeholder="Unassigned" /></label>
+          <label class="span-two" title="Operational details visible in the issue list">Notes <span class="hint-mark" title="Operational details visible in the issue list">?</span><textarea name="notes" rows="3" maxlength="500"></textarea></label>
+        </div>
+        <div class="dialog-actions"><button type="button" id="archive-issue" class="quiet-button danger" title="Archive this issue and keep it recoverable">Archive</button><button type="button" class="quiet-button" data-close="issue-dialog" title="Cancel changes">Cancel</button><button type="submit" class="primary-button" title="Save issue changes">Save issue</button></div>
+      </form>
+    </dialog>
+    <dialog id="zone-dialog" class="form-dialog">
+      <form id="zone-form" method="dialog">
+        <div class="dialog-heading"><h2 id="zone-dialog-title" title="Edit a demo zone">Zone <span class="hint-mark" title="Edit the name and map position of a demo zone">?</span></h2><button type="button" class="icon-button" data-close="zone-dialog" aria-label="Close zone form" title="Close">×</button></div>
+        <div class="form-grid">
+          <label class="span-two" title="Zone name shown on the map">Name <span class="hint-mark" title="Zone name shown on the map">?</span><input name="name" required maxlength="40" /></label>
+          <label title="Latitude in decimal degrees">Latitude <span class="hint-mark" title="Latitude in decimal degrees">?</span><input name="lat" type="number" min="-90" max="90" step="0.000001" required /></label>
+          <label title="Longitude in decimal degrees">Longitude <span class="hint-mark" title="Longitude in decimal degrees">?</span><input name="lon" type="number" min="-180" max="180" step="0.000001" required /></label>
+        </div>
+        <div class="dialog-actions"><button type="button" id="archive-zone" class="quiet-button danger" title="Archive this demo zone">Archive</button><button type="button" class="quiet-button" data-close="zone-dialog" title="Cancel changes">Cancel</button><button type="submit" class="primary-button" title="Save zone changes">Save zone</button></div>
+      </form>
+    </dialog>
+    <dialog id="settings-dialog" class="form-dialog">
+      <div class="dialog-heading"><h2 title="Display settings">Settings <span class="hint-mark" title="Change theme, imagery, and demo data">?</span></h2><button type="button" class="icon-button" data-close="settings-dialog" aria-label="Close settings" title="Close">×</button></div>
+      <div class="form-grid">
+        <label title="Search the available color themes">Theme <span class="hint-mark" title="Search and select one of the color themes">?</span><input id="theme-search" placeholder="Search themes" autocomplete="off" /></label>
+        <label title="Map imagery source">Map imagery <span class="hint-mark" title="Choose street map or satellite imagery">?</span><select id="imagery-select"><option value="osm">Street map</option><option value="esri">Satellite</option></select></label>
+        <div class="span-two theme-options" id="theme-options" role="group" aria-label="Themes"></div>
+        <div class="span-two archived-zones" id="archived-zones"></div>
+      </div>
+      <div class="dialog-actions"><button id="export-data" class="quiet-button" title="Download demo zones and operations as JSON">Export data</button><button id="reset-demo" class="quiet-button danger" title="Restore the original demo zones and issues">Reset demo</button></div>
+    </dialog>
+    <script type="module" src="/stadium/main.js"></script>
+  </body>
+</html>
